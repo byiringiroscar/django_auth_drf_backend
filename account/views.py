@@ -21,12 +21,23 @@ class RegisterView(APIView):
             if password == re_password:
                 if len(password) >= 8:
                     if not User.objects.filter(username=username).exists():
-                        User.objects.create_user(
+                        user = User.objects.create_user(
                             first_name=first_name,
                             last_name=last_name,
                             username=username,
                             password=password
                         )
+                        user.save()
+                        if User.objects.filter(username=username).exists():
+                            return Response(
+                                {"message": "Account created successfully"},
+                                status=status.HTTP_201_CREATED
+                            )
+                        else:
+                            return Response(
+                                {"error": "Something went wrong when trying to create account"},
+                                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                            )
                     else:
                         return Response(
                             {"error": "Username already exists"},
